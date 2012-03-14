@@ -1,0 +1,24 @@
+#!/bin/env ruby
+
+$: << File.join(File.dirname(__FILE__), "..", "lib")
+
+require 'metarepo'
+Metarepo.connect_db
+require 'metarepo/repo'
+require 'metarepo/package'
+require 'metarepo/upstream'
+require 'metarepo/pool'
+
+Metarepo::Log.level = :debug
+Metarepo::Config.pool_path '/data/pool'
+Metarepo::Config.repo_path '/data/repo'
+
+upstream = Metarepo::Upstream.find_or_create(:name => "centos-6.2-os-x86_64", :type => "yum", :path => "/data/centos-6.2/6.2/os/x86_64/Packages")
+upstream.sync_packages
+
+pool = Metarepo::Pool.new
+pool.update
+
+repo = Metarepo::Repo.find_or_create(:name => "centos-6.2-os-x86_64-a", :type => "yum")
+repo.sync_to_upstream("centos-6.2-os-x86_64")
+
