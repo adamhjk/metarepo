@@ -36,6 +36,11 @@ RSpec::Core::RakeTask.new(:rcov) do |spec|
   spec.rcov = true
 end
 
+desc "Execute a pry session with the paths preloaded"
+task :pry do
+  exec "pry -I #{File.join(File.dirname(__FILE__), "lib")} -r metarepo"
+end
+
 task :default => :spec
 
 require 'yard'
