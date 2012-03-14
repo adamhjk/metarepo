@@ -38,7 +38,6 @@ class Metarepo
 
     def sync_to_upstream(name, pool)
       Metarepo::Upstream[:name => name].packages.each do |package|
-        File.link(pool.pool_file_for(package), 
       end
     end
   end
