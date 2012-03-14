@@ -22,24 +22,24 @@ describe Metarepo::Pool do
     end
   end
 
-  describe "update_package" do
+  describe "link_package" do
     before(:each) do
       @package = Metarepo::Package[:name => "basesystem"]
     end
 
     it "creates paths for shasums" do
-      @pool.update_package(@package)
+      @pool.link_package(@package)
       Dir.exists?(File.join(@pool_dir, "1", "88", "6000")).should == true
     end
 
     it "hardlinks in the package file from the upstream" do
-      @pool.update_package(@package)
+      @pool.link_package(@package)
       File.exists?(File.join(@pool_dir, "1", "88", "6000", @package.filename)).should == true
     end
 
     it "does not hardlink in the package file from the upstream if it exists" do
-      @pool.update_package(@package)
-      lambda { @pool.update_package(@package) }.should_not raise_error(Errno::EEXIST)
+      @pool.link_package(@package)
+      lambda { @pool.link_package(@package) }.should_not raise_error(Errno::EEXIST)
     end
   end
 

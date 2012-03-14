@@ -6,10 +6,12 @@ class Metarepo
 
     many_to_many :packages
 
+    attr_accessor :repo_dir
+
     def validate
       super
       validates_unique :name
-      validates_presence [ :path, :type ]
+      validates_presence [ :type ]
       errors.add(:type, "must be yum, apt or dir") unless [ "yum", "apt", "dir" ].include?(type)
     end
 
@@ -27,19 +29,51 @@ class Metarepo
       end
     end
   
-    def repo_path_for(package)
-
+    def repo_path
+      rpath = @repo_dir.nil? ? Metarepo::Config.repo_path : @repo_dir
+      File.expand_path(File.join(rpath, name))
     end
 
-    def update_package(package, pool=nil)
+    def repo_file_for(package)
+      File.expand_path(File.join(repo_path, package.filename))
+    end
+
+    def link_package(package, pool=nil)
       pool ||= Metarepo::Pool.new(Metarepo::Config.pool_path)
-      Metarepo.create_directory(package_pool_path)
+      Metarepo.create_directory(repo_path)
+      unless File.exists?(repo_file_for(package))
+        File.link(pool.pool_file_for(package), repo_file_for(package))
+      end
+      add_package(package) unless packages.detect { |o| o.shasum == package.shasum } 
     end
 
-    def sync_to_upstream(name, pool)
-      Metarepo::Upstream[:name => name].packages.each do |package|
+    def unlink_package(package, pool=nil)
+      File.unlink(repo_file_for(package)) if File.exists?(repo_file_for(package))
+      remove_package(package) 
+    end
+
+    def sync_to_upstream(name, pool=nil)
+      pool ||= Metarepo::Pool.new(Metarepo::Config.pool_path)
+      upstream_packages = Metarepo::Upstream[:name => name].packages
+      upstream_packages.each do |upstream_package|
+        link_package(upstream_package, pool) unless packages.detect { |o| o.shasum == upstream_package.shasum }
+      end
+      packages.each do |repo_package|
+        unlink_package(repo_package, pool) unless upstream_packages.detect { |o| o.shasum == repo_package.shasum }
       end
     end
+
+    def update_index_yum
+      Metarepo.command("createrepo #{repo_path}")
+    end
+
+    def update_index
+      case type
+      when "yum"
+        update_index_yum
+      end
+    end
+
   end
 end
 

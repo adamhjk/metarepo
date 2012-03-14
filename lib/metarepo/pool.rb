@@ -17,7 +17,7 @@ class Metarepo
       File.join(pool_path_for(package), package.filename)
     end
 
-    def update_package(package)
+    def link_package(package)
       package_pool_path = pool_path_for(package)
       Metarepo.create_directory(package_pool_path)
 
@@ -29,7 +29,7 @@ class Metarepo
 
     def update
       Metarepo::Package.dataset.select(:shasum, :path, :filename).each do |package|
-        update_package(package)
+        link_package(package)
       end
     end
   end
