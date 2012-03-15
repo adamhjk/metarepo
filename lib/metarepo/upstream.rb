@@ -60,7 +60,7 @@ class Metarepo
 
       # Remove no longer relevant associations
       packages(true).detect do |pkg|
-        Metarepo::Log.debug("Removing package #{package.name} from upstream #{name}")
+        Metarepo::Log.debug("Removing package #{pkg.name} from upstream #{name}")
         remove_package(pkg) unless seen_list.include?(pkg.shasum)
       end
     end
