@@ -35,11 +35,13 @@ class Metarepo
     end
 
     def link_package(package)
+      Metarepo::Log.info("Linking #{package.name} from #{package.path} to pool")
       package_pool_path = pool_path_for(package)
       Metarepo.create_directory(package_pool_path)
 
       package_pool_file = pool_file_for(package)
       unless File.exists?(package_pool_file)
+        Metarepo::Log.debug("Building hard link for missing package #{package.name} in pool")
         File.link(package.path, File.join(package_pool_path, package.filename))
       end
     end

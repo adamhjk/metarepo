@@ -44,11 +44,13 @@ class Metarepo
     end
 
     def sync_packages(file_list=nil)
+      Metarepo::Log.info("Syncing packages from upstream #{name}")
       file_list ||= list_packages
       save
       seen_list = []
       file_list.each do |pkg|
         package = Metarepo::Package.from_file(pkg)
+        Metarepo::Log.debug("Adding package #{package.name} to upstream #{name}")
         seen_list << package.shasum
         db.transaction do
           package.save
@@ -58,6 +60,7 @@ class Metarepo
 
       # Remove no longer relevant associations
       packages(true).detect do |pkg|
+        Metarepo::Log.debug("Removing package #{package.name} from upstream #{name}")
         remove_package(pkg) unless seen_list.include?(pkg.shasum)
       end
     end

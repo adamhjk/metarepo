@@ -56,15 +56,18 @@ class Metarepo
     end
 
     def link_package(package, pool=nil)
+      Metarepo::Log.info("Linking #{package.name} to repo #{name}")
       pool ||= Metarepo::Pool.new(Metarepo::Config.pool_path)
       Metarepo.create_directory(repo_path)
       unless File.exists?(repo_file_for(package))
+        Metarepo::Log.info("Building hard link for missing package #{package.name} in repo")
         File.link(pool.pool_file_for(package), repo_file_for(package))
       end
       add_package(package) unless packages.detect { |o| o.shasum == package.shasum } 
     end
 
     def unlink_package(package, pool=nil)
+      Metarepo::Log.info("Unlinking #{package.name} from repo #{name}")
       File.unlink(repo_file_for(package)) if File.exists?(repo_file_for(package))
       remove_package(package) 
     end
@@ -85,6 +88,7 @@ class Metarepo
     end
 
     def update_index
+      Metarepo::Log.info("Creating package index")
       case type
       when "yum"
         update_index_yum
