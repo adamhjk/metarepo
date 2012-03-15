@@ -47,7 +47,7 @@ class Metarepo
     end
 
     def update
-      Metarepo::Package.dataset.select(:shasum, :path, :filename).each do |package|
+      Metarepo::Package.dataset.select(:name, :shasum, :path, :filename).each do |package|
         link_package(package)
       end
     end
