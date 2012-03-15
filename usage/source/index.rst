@@ -20,7 +20,8 @@ Contents:
 
 .. toctree::
   :maxdepth: 2
-  
+
+  api
   database_design
 
 
