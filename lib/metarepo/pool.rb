@@ -23,7 +23,7 @@ class Metarepo
 
     def initialize(dir=nil)
       @dir = dir
-      @dir ||= Metarepo::Config['pool_path']
+      @dir ||= Metarepo::Config.pool_path
     end
 
     def pool_path_for(package)
