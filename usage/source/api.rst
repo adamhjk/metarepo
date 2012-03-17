@@ -30,7 +30,7 @@ Creates a new upstream
 
 **Response**
 
-* 200 OK 
+* 201 Created 
 
 .. code-block:: javascript
 
@@ -61,6 +61,7 @@ Returns the upstream
     "name": "centos-6.0-os-x86_64",
     "path": "poop",
     "type": "yum",
+    "created_at": "2012-03-15T17:45Z"
     "updated_at": "2012-03-15T17:45Z"
   }
 
@@ -80,7 +81,7 @@ Updates or creates the upstream. If the upstream already exists, it will trigger
 
 **Response**
 
-* 200 OK on creation.
+* 201 Created on creation.
 * 202 Accepted if we are just re-syncing.
 
 .. code-block:: javascript
@@ -150,7 +151,7 @@ Creates a new repo
 
 **Response**
 
-* 200 OK 
+* 201 Created
 
 .. code-block:: javascript
 
@@ -199,7 +200,7 @@ Updates or creates the repo.
 
 **Response**
 
-* 200 OK on creation.
+* 201 OK on creation.
 
 .. code-block:: javascript
 
