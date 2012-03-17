@@ -8,6 +8,9 @@ gem "pg", ">= 0"
 gem "mixlib-config", ">= 0"
 gem "mixlib-log", ">= 0"
 gem "mixlib-shellout", ">= 0"
+gem "sinatra", ">= 0"
+gem "yajl-ruby", ">= 0"
+gem "resque", ">= 0"
 
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
@@ -19,4 +22,6 @@ group :development do
   gem "jeweler", "~> 1.8.3"
   gem "simplecov", ">= 0"
   gem "pry", ">= 0"
+	gem "rack-test", ">= 0"
+	gem "autotest-standalone", ">= 0"
 end
