@@ -29,6 +29,7 @@ class Metarepo
     end
 
     def connect_db(db_connect=Metarepo::Config['db_connect'])
+      Sequel::Model.plugin :timestamps
       Sequel::Model.db = Sequel.connect(db_connect)
     end
 
