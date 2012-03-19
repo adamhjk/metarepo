@@ -23,6 +23,7 @@ when "upstream"
 else
   repo = Metarepo::Repo.find_or_create(:name => ARGV[0], :type => "yum")
   repo.sync_to_upstream("centos-6.2-os-x86_64")
+  repo.update_index
 end
 
 
