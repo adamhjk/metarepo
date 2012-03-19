@@ -13,12 +13,16 @@ Metarepo::Log.level = :debug
 Metarepo::Config.pool_path '/data/pool'
 Metarepo::Config.repo_path '/data/repo'
 
-upstream = Metarepo::Upstream.find_or_create(:name => "centos-6.2-os-x86_64", :type => "yum", :path => "/data/centos-6.2/6.2/os/x86_64/Packages")
-upstream.sync_packages
+case ARGV[0]
+when "upstream"
+  upstream = Metarepo::Upstream.find_or_create(:name => "centos-6.2-os-x86_64", :type => "yum", :path => "/data/centos-6.2/6.2/os/x86_64/Packages")
+  upstream.sync_packages
 
-pool = Metarepo::Pool.new
-pool.update
+  pool = Metarepo::Pool.new
+  pool.update
+else
+  repo = Metarepo::Repo.find_or_create(:name => ARGV[0], :type => "yum")
+  repo.sync_to_upstream("centos-6.2-os-x86_64")
+end
 
-repo = Metarepo::Repo.find_or_create(:name => "centos-6.2-os-x86_64-a", :type => "yum")
-repo.sync_to_upstream("centos-6.2-os-x86_64")
 
