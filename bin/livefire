@@ -27,7 +27,7 @@ else
     upstream_packages.each do |upstream_package|
       repo.link_package(upstream_package, pool) unless repo.packages.detect { |o| o.shasum == upstream_package.shasum }
     end
-    packages.each do |repo_package|
+    repo.packages.each do |repo_package|
       repo.unlink_package(repo_package, pool) unless upstream_packages.detect { |o| o.shasum == repo_package.shasum }
     end
   else
