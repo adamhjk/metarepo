@@ -78,7 +78,8 @@ class Metarepo
 				end
 			end
       status 201
-      Resque.enqueue(Metarepo::Job::UpstreamSyncPackages, upstream.id)
+      meta = Metarepo::Job::UpstreamSyncPackages.enqueue(upstream.id)
+      serialize({ :enqueued_at => meta.enqueued_at, :job_id => meta.meta_id, :job_class => meta.job_class })
 		end
 
     get "/upstream/:name" do
@@ -117,17 +118,8 @@ class Metarepo
         return serialize({ "error" => e.message })
 			end
 
-      Resque.enqueue(Metarepo::Job::UpstreamSyncPackages, upstream.id)
-
-      serialize(
-        {
-          "name" => upstream[:name],
-          "type" => upstream[:type],
-          "path" => upstream[:path],
-          "created_at" => upstream[:created_at],
-          "updated_at" => upstream[:updated_at]
-        }
-      )
+      meta = Metarepo::Job::UpstreamSyncPackages.enqueue(upstream.id)
+      serialize({ :enqueued_at => meta.enqueued_at, :job_id => meta.meta_id, :job_class => meta.job_class })
 		end
 
     get "/upstream/:name/packages" do
@@ -235,11 +227,25 @@ class Metarepo
 			package_data = Yajl::Parser.parse(request.body.read)
       repo = Metarepo::Repo[:name => params[:name]]
       if package_data.has_key?("sync")
-        Resque.enqueue(Metarepo::Job::RepoSyncPackages, repo.name, package_data["sync"]["type"], package_data["sync"]["name"])
+        meta = Metarepo::Job::RepoSyncPackages.enqueue(repo.name, package_data["sync"]["type"], package_data["sync"]["name"])
       else
-        Resque.enqueue(Metarepo::Job::RepoPackages, repo.name, package_data)
+        meta = Metarepo::Job::RepoPackages.enqueue(repo.name, package_data)
       end
       status 201
+      serialize({ :enqueued_at => meta.enqueued_at, :job_id => meta.meta_id, :job_class => meta.job_class })
+    end
+
+    get "/job/:job_class/:job_id" do
+			content_type :json
+      meta = Resque.constantize(params["job_class"]).get_meta(params["job_id"])
+      serialize({
+        :job_id => meta.meta_id,
+        :job_class => meta.job_class,
+        :enqueued_at => meta.enqueued_at,
+        :started_at => meta.started_at,
+        :succeeded => meta.succeeded?,
+        :finished_at => meta.finished_at
+      })
     end
 
 	end

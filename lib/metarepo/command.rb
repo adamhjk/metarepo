@@ -52,8 +52,21 @@ class Metarepo
       :show_options => true,
       :exit => 0
 
+    def loop_on_job(data)
+      puts "* Querying job data every 2 seconds *"
+      while true
+        job_response = @rest["/job/#{data["job_class"]}/#{data["job_id"]}"].get
+        job_data = Yajl::Parser.parse(job_response.body)
+        puts Yajl::Encoder.encode(job_data, :pretty => true, :indent => "  ")
+        if job_data["finished_at"] 
+          job_data["succeeded"] == true ? exit(0) : exit(1)
+        end
+        sleep 2
+      end
+    end
+
     def setup
-      opts = parse_options
+      @opts = parse_options
       Metarepo::Config.from_file(config[:config_file]) if config[:config_file]
       Metarepo::Log.level = config[:log_level] if config[:log_level]
       Metarepo::Config.uri = config[:uri] if config[:uri]

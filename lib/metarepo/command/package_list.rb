@@ -24,37 +24,17 @@ require 'mixlib/cli'
 
 class Metarepo
   class Command
-		class UpstreamCreate < Metarepo::Command
-
-			option :name,
-				:short => "-n NAME",
-				:long => "--name NAME",
-				:description => "The upstream name",
-				:required => true
-
-			option :type,
-				:short => "-t TYPE",
-				:long => "--type TYPE",
-				:description => "The upstream type (yum, apt, dir)",
-				:required => true
-
-			option :path,
-				:short => "-p PATH",
-				:long => "--path PATH",
-				:description => "The upstream path",
-				:required => true
-
-			# upstream create 
+		class PackageList < Metarepo::Command
 			def run
-				response = @rest["/upstream/#{config[:name]}"].put(
-					Yajl::Encoder.encode({ "name" => config[:name], "type" => config[:type], "path" => config[:path] }),
-					{ :content_type => "application/json" }
-				)
+				response = @rest["/package"].get
 				data = Yajl::Parser.parse(response.body)
 				puts Yajl::Encoder.encode(data, :pretty => true, :indent => "  ")
-				loop_on_job(data)
+				exit 0
 			end
 		end
   end
 end
+
+
+
 

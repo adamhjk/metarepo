@@ -43,8 +43,19 @@ end
 
 task :default => :spec
 
+
 require 'yard'
 YARD::Rake::YardocTask.new
 
 require 'resque/tasks'
+
+task "resque:setup" do
+  $: << File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
+  require 'metarepo'
+  Metarepo::Log.level = :debug
+  Metarepo.connect_db 
+  require 'metarepo/job/repo_sync_packages'
+  require 'metarepo/job/upstream_sync_packages'
+  require 'metarepo/job/repo_packages'
+end
 

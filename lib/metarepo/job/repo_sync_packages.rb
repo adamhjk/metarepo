@@ -3,14 +3,16 @@ Metarepo.connect_db unless Sequel::Model.db
 require 'metarepo/upstream'
 require 'metarepo/package'
 require 'metarepo/repo'
+require 'resque-meta'
 
 class Metarepo
   class Job
     class RepoSyncPackages
+      extend Resque::Plugins::Meta
 
       @queue = :default
 
-      def self.perform(repo_name, sync_type, sync_id)
+      def self.perform(meta_id, repo_name, sync_type, sync_id)
         Metarepo::Log.info("Syncronizing repo #{repo_name} to #{sync_type} #{sync_id}")
         repo = Metarepo::Repo[:name => repo_name]
         case sync_type

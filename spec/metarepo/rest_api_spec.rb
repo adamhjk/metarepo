@@ -140,9 +140,16 @@ describe Metarepo::RestAPI do
 				response_data["error"].should =~ /type must be/
 			end
 
+      it "returns the job_id" do
+				response_data = Yajl::Parser.parse(last_response.body)
+        response_data.should have_key("job_id")
+      end
+
       it "puts a sync job on the queue, and the job updates the database" do
+				response_data = Yajl::Parser.parse(last_response.body)
         resque_run.should == true
         Metarepo::Upstream[:name => "centos-6.0-updates-x86_64"].packages(true).length.should == 2
+        Resque.constantize(response_data["job_class"]).get_meta(response_data["job_id"]).finished?.should == true
       end
 		end
   end

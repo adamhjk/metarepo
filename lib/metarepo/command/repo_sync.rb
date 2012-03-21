@@ -24,30 +24,29 @@ require 'mixlib/cli'
 
 class Metarepo
   class Command
-		class UpstreamCreate < Metarepo::Command
+		class RepoSync < Metarepo::Command
 
 			option :name,
 				:short => "-n NAME",
 				:long => "--name NAME",
-				:description => "The upstream name",
+				:description => "The repo name",
 				:required => true
 
 			option :type,
 				:short => "-t TYPE",
 				:long => "--type TYPE",
-				:description => "The upstream type (yum, apt, dir)",
+				:description => "The type of thing to sync to (upstream or repo)",
 				:required => true
 
-			option :path,
-				:short => "-p PATH",
-				:long => "--path PATH",
-				:description => "The upstream path",
+			option :sync_to,
+				:short => "-s SYNC_TO",
+				:long => "--sync SYNC_TO",
+				:description => "The specific thing to sync to",
 				:required => true
 
-			# upstream create 
 			def run
-				response = @rest["/upstream/#{config[:name]}"].put(
-					Yajl::Encoder.encode({ "name" => config[:name], "type" => config[:type], "path" => config[:path] }),
+				response = @rest["/repo/#{config[:name]}/packages"].put(
+					Yajl::Encoder.encode({ "sync" => { "type" => config[:type], "name" => config[:sync_to] }}),
 					{ :content_type => "application/json" }
 				)
 				data = Yajl::Parser.parse(response.body)
@@ -57,4 +56,5 @@ class Metarepo
 		end
   end
 end
+
 

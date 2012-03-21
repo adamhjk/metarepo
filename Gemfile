@@ -11,7 +11,7 @@ gem "mixlib-shellout", ">= 0"
 gem "sinatra", ">= 0"
 gem "yajl-ruby", ">= 0"
 gem "resque", ">= 0"
-gem "commander", ">= 0"
+gem "resque-meta", ">= 0"
 gem "rest-client", ">= 0"
 gem "vegas", ">= 0"
 

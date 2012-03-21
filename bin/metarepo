@@ -7,16 +7,27 @@ require 'metarepo/command'
 require 'metarepo/command/upstream_list'
 require 'metarepo/command/upstream_create'
 require 'metarepo/command/upstream_show'
+require 'metarepo/command/upstream_packages'
+require 'metarepo/command/repo_list'
 require 'metarepo/command/repo_create'
 require 'metarepo/command/repo_show'
+require 'metarepo/command/repo_packages'
+require 'metarepo/command/repo_sync'
+require 'metarepo/command/package_list'
+require 'metarepo/command/package_show'
 
 commands = {
 	[ "upstream", "list" ] => Metarepo::Command::UpstreamList,
 	[ "upstream", "create" ] => Metarepo::Command::UpstreamCreate,
 	[ "upstream", "show" ] => Metarepo::Command::UpstreamShow,
+	[ "upstream", "packages" ] => Metarepo::Command::UpstreamPackages,
 	[ "repo", "list" ] => Metarepo::Command::RepoList,
 	[ "repo", "create" ] => Metarepo::Command::RepoCreate,
 	[ "repo", "show" ] => Metarepo::Command::RepoShow,
+	[ "repo", "packages" ] => Metarepo::Command::RepoPackages,
+	[ "repo", "sync" ] => Metarepo::Command::RepoSync,
+	[ "package", "list" ] => Metarepo::Command::PackageList,
+	[ "package", "show" ] => Metarepo::Command::PackageShow,
 }
 
 if commands.has_key?([ARGV[0], ARGV[1]])
