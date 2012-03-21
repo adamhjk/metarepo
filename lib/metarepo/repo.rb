@@ -72,15 +72,27 @@ class Metarepo
       remove_package(package) 
     end
 
-    def sync_to_upstream(name, pool=nil)
+    def sync_packages(upstream_packages, pool=nil)
       pool ||= Metarepo::Pool.new(Metarepo::Config.pool_path)
-      upstream_packages = Metarepo::Upstream[:name => name].packages
       upstream_packages.each do |upstream_package|
         link_package(upstream_package, pool) unless packages.detect { |o| o.shasum == upstream_package.shasum }
       end
-      packages.each do |repo_package|
+      packages_dataset.all do |repo_package|
         unlink_package(repo_package, pool) unless upstream_packages.detect { |o| o.shasum == repo_package.shasum }
       end
+      self.save
+    end
+
+    def sync_to_upstream(name, pool=nil)
+      pool ||= Metarepo::Pool.new(Metarepo::Config.pool_path)
+      upstream_packages = Metarepo::Upstream[:name => name].packages_dataset.all
+      sync_packages(upstream_packages, pool)
+    end
+
+    def sync_to_repo(name, pool=nil)
+      pool ||= Metarepo::Pool.new(Metarepo::Config.pool_path)
+      upstream_packages = Metarepo::Repo[:name => name].packages_dataset.all
+      sync_packages(upstream_packages, pool)
     end
 
     def update_index_yum

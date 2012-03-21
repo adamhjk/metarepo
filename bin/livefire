@@ -23,11 +23,12 @@ when "upstream"
 else
   repo = Metarepo::Repo.find_or_create(:name => ARGV[0], :type => "yum")
   if ARGV[1] 
-    upstream_packages = Metarepo::Package.limit(ARGV[1])
+    upstream_packages = Metarepo::Package.limit(ARGV[1]).order(:name)
     upstream_packages.each do |upstream_package|
       repo.link_package(upstream_package, pool) unless repo.packages.detect { |o| o.shasum == upstream_package.shasum }
     end
-    repo.packages.each do |repo_package|
+    repo.reload
+    repo.packages(true).each do |repo_package|
       repo.unlink_package(repo_package, pool) unless upstream_packages.detect { |o| o.shasum == repo_package.shasum }
     end
   else

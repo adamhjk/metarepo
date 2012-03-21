@@ -16,18 +16,24 @@
 # limitations under the License.
 #
 
-require 'mixlib/config'
+require 'metarepo'
+require 'metarepo/command'
+require 'yajl'
+require 'rest_client'
+require 'mixlib/cli'
 
 class Metarepo
-  class Config
-    extend Mixlib::Config
-
-    db_connect 'postgres://localhost/metarepo'
-    pool_path '/var/opt/metarepo/pool'
-    repo_path '/var/opt/metarepo/repo'
-    upstream_path '/var/opt/metarepo/upstream'
-		uri "http://localhost:6667"
-
+  class Command
+		class RepoList < Metarepo::Command
+			def run
+				response = @rest["/repo"].get
+				data = Yajl::Parser.parse(response.body)
+				puts Yajl::Encoder.encode(data, :pretty => true, :indent => "  ")
+				exit 0
+			end
+		end
   end
 end
+
+
 

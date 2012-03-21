@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+
+$: << File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
+
+require 'metarepo'
+require 'metarepo/command'
+require 'metarepo/command/upstream_list'
+require 'metarepo/command/upstream_create'
+require 'metarepo/command/upstream_show'
+require 'metarepo/command/repo_create'
+require 'metarepo/command/repo_show'
+
+commands = {
+	[ "upstream", "list" ] => Metarepo::Command::UpstreamList,
+	[ "upstream", "create" ] => Metarepo::Command::UpstreamCreate,
+	[ "upstream", "show" ] => Metarepo::Command::UpstreamShow,
+	[ "repo", "list" ] => Metarepo::Command::RepoList,
+	[ "repo", "create" ] => Metarepo::Command::RepoCreate,
+	[ "repo", "show" ] => Metarepo::Command::RepoShow,
+}
+
+if commands.has_key?([ARGV[0], ARGV[1]])
+	cli = commands[[ARGV[0], ARGV[1]]].new
+	cli.setup
+	cli.run
+else
+	puts "#{$0} COMMAND [options]"
+	commands.each do |command, klass| 
+		puts "  #{File.basename($0)} #{command.join(' ')} [options]"
+	end
+	exit 1
+end
+

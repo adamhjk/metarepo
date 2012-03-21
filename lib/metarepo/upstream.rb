@@ -31,14 +31,19 @@ class Metarepo
     end
 
     def list_packages
+      if path =~ /^\//
+        real_path = path 
+      else
+        real_path = File.join(Metarepo::Config.upstream_path, path)
+      end
       case type
       when "yum"
-        Dir[File.join(path, "*.rpm")]
+        Dir[File.join(real_path, "*.rpm")]
       when "apt"
       when "dir"
         [
-          Dir[File.join(path, "*.rpm")],
-          Dir[File.join(path, "*.deb")]
+          Dir[File.join(real_path, "*.rpm")],
+          Dir[File.join(real_path, "*.deb")]
         ].flatten
       end
     end

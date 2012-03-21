@@ -16,18 +16,30 @@
 # limitations under the License.
 #
 
-require 'mixlib/config'
+require 'metarepo'
+require 'metarepo/command'
+require 'yajl'
+require 'rest_client'
+require 'mixlib/cli'
 
 class Metarepo
-  class Config
-    extend Mixlib::Config
+  class Command
+		class UpstreamShow < Metarepo::Command
+			option :name,
+				:short => "-n NAME",
+				:long => "--name NAME",
+				:description => "The upstream name",
+				:required => true
 
-    db_connect 'postgres://localhost/metarepo'
-    pool_path '/var/opt/metarepo/pool'
-    repo_path '/var/opt/metarepo/repo'
-    upstream_path '/var/opt/metarepo/upstream'
-		uri "http://localhost:6667"
-
+			def run
+				response = @rest["/upstream/#{config[:name]}"].get
+				data = Yajl::Parser.parse(response.body)
+				puts Yajl::Encoder.encode(data, :pretty => true, :indent => "  ")
+				exit 0
+			end
+		end
   end
 end
+
+
 

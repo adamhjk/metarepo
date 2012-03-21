@@ -253,12 +253,7 @@ Set the list of packages in this repo. We take two kinds of request bodies:
 .. code-block:: javascript
 
   {
-    "08cb7b6e5af66461f7c7c3c66e6a7b75cb152c567d8560eda9f8f2b68bcee1e5": {
-      "name": "at",
-      "filename": "at-3.1.10-42.el6.i686.rpm",
-      "shasum": "...",
-      "version": "3.1.0"
-    }
+    "08cb7b6e5af66461f7c7c3c66e6a7b75cb152c567d8560eda9f8f2b68bcee1e5": true
   }
 
 *Sync with an upstream or other repo*

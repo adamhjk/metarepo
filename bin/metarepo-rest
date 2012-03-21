@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+
+$: << File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
+
+require 'metarepo'
+Metarepo.connect_db
+require 'metarepo/rest_api'
+require 'vegas'
+
+Vegas::Runner.new(Metarepo::RestAPI, 'metarepo-rest', { :port => '6667' })
