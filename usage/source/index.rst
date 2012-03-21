@@ -9,12 +9,23 @@ Welcome to metarepo's documentation!
 * We track "upstreams"
 * Files appear in the upstrem
 * Get added to the pool
-
 * Repos get created from packages in the pool
-** Can be synced to an upstream
-** Can be synced to another repo
-** Can have a specific policy
+  * Can be synced to an upstream
+  * Can be synced to another repo
+  * Can have a specific policy
 
+.. graphviz:: 
+
+  digraph build_chain {
+    upstream [label="centos-6-os-x86_64"];
+    makerepo [label="centos-6-os-x86_64-20111210"];
+    development [label="set dev env"];
+    production [label="set prod env"];
+
+    "upstream" -> "makerepo";
+    "makerepo" -> "development";
+    "development" -> "production";
+  }
 
 Contents:
 
