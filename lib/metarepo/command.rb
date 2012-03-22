@@ -30,27 +30,30 @@ class Metarepo
     option :config_file,
       :short => "-c CONFIG",
       :long => "--config CONFIG",
+      :on => :tail,
       :description => "A configuration file to use"
 
     option :log_level,
       :short => "-l LEVEL",
       :long  => "--log LEVEL",
       :description => "Set the log level (debug, info, warn, error, fatal)",
+      :on => :tail,
       :proc => Proc.new { |l| l.to_sym }
 
     option :uri,
       :short => "-u URI",
       :long => "--uri URI",
+      :on => :tail,
       :description => "The URI to find your metarepo server"
 
-    option :help,
-      :short => "-h",
-      :long => "--help",
-      :description => "Show this message",
-      :on => :tail,
-      :boolean => true,
-      :show_options => true,
-      :exit => 0
+     option :help,
+       :short        => "-h",
+       :long         => "--help",
+       :description  => "Show this message",
+       :on           => :tail,
+       :boolean      => true,
+       :show_options => true,
+       :exit         => 0
 
     def loop_on_job(data)
       puts "* Querying job data every 2 seconds *"

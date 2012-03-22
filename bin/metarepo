@@ -30,8 +30,11 @@ commands = {
 	[ "package", "show" ] => Metarepo::Command::PackageShow,
 }
 
+require 'pp'
+
 if commands.has_key?([ARGV[0], ARGV[1]])
 	cli = commands[[ARGV[0], ARGV[1]]].new
+	cli.options = cli.options.merge!(Metarepo::Command.options)
 	cli.setup
 	cli.run
 else
