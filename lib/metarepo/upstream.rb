@@ -15,7 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 require 'metarepo/package'
+require 'zlib'
 
 class Metarepo
   class Upstream < Sequel::Model
@@ -40,6 +42,22 @@ class Metarepo
       when "yum"
         Dir[File.join(real_path, "*.rpm")]
       when "apt"
+				file_list = Array.new
+				Zlib::GzipReader.open(File.join(real_path, "Packages.gz")) do |file|
+					file.each_line do |line|
+						if line =~ /^Filename: (.+)$/
+							file_list << File.expand_path(File.join(
+								real_path,
+								"..",
+								"..",
+								"..",
+								"..",
+								$1
+						  ))
+						end
+					end
+				end
+				file_list
       when "dir"
         [
           Dir[File.join(real_path, "*.rpm")],

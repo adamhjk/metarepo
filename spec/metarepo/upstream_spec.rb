@@ -66,11 +66,22 @@ describe Metarepo::Upstream do
   end
   
   describe "list_packages" do
-    it "should return the path to each package in the upstream" do
-      lp = @centos.list_packages
-      lp.should include(File.join(SPEC_DATA, "/upstream/centos/6.0/os/i386/Packages", "bitmap-fonts-compat-0.3-15.el6.noarch.rpm"))
-      lp.should include(File.join(SPEC_DATA, "/upstream/centos/6.0/os/i386/Packages", "basesystem-10.0-4.el6.noarch.rpm"))
-    end
+
+		describe "rpm" do
+			it "should return the path to each package in the upstream" do
+				lp = @centos.list_packages
+				lp.should include(File.join(SPEC_DATA, "/upstream/centos/6.0/os/i386/Packages", "bitmap-fonts-compat-0.3-15.el6.noarch.rpm"))
+				lp.should include(File.join(SPEC_DATA, "/upstream/centos/6.0/os/i386/Packages", "basesystem-10.0-4.el6.noarch.rpm"))
+			end
+		end
+
+		describe "debian" do
+			it "should return the packages in the pool for the repo" do
+				@deb = Metarepo::Upstream.create(:name => "debian-stable-main-amd64", :type => "apt", :path => File.join(SPEC_DATA, "upstream/debian/dists/stable/main/binary-amd64"))
+				lp = @deb.list_packages
+				lp.should include(File.join(SPEC_DATA, "upstream/debian/pool/main/2/2vcard/2vcard_0.5-3_all.deb"))
+			end
+		end
   end
 
   describe "sync_packages" do

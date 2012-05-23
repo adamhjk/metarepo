@@ -71,17 +71,30 @@ class Metarepo
       Metarepo::Log.debug("Extracting package data from #{file}")
       Metarepo.command_per_line('dpkg-deb --show --showformat \'name: ${Package}\nversion: ${Version}\narch: ${Architecture}\nmaintainer: ${Maintainer}\ndescription: ${Description}\nurl: ${Homepage}\n\' ' + file) do |item|
         next if item =~ /^ / # Skip extraneous lines from dpkg
-        item =~ /^(.+): (.+)$/
-        accessor = $1
-        value = $2
+        case item
+				when /^(.+?): (.+)$/
+					accessor = $1
+					value = $2
+				when /^(.+?):/
+					accessor = $1
+					value = "nil"
+				end
+				Metarepo::Log.debug("#{accessor} #{value}")
+
         if accessor == 'version'
-          value =~ /^(.+)-(.+)$/
-          version = $1
-          iteration = $2
-          p.send("version=".to_sym, version)
-          p.send("iteration=".to_sym, iteration)
-        else
+          if value =~ /^(.+)-(.+)$/
+						version = $1
+						iteration = $2
+					else
+						version = value
+						iteration = 0
+					end
+					p.send("version=".to_sym, version)
+					p.send("iteration=".to_sym, iteration)
+				elsif accessor != "" && !accessor.nil?
           p.send("#{accessor}=".to_sym, value)
+				else
+					Metarepo::Log.debug("Blank accessor!")
         end
       end
       p
