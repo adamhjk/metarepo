@@ -112,6 +112,30 @@ class Metarepo
       hashfunc.hexdigest
     end
 
+    def self.get_shasum1(file)
+      Metarepo::Log.debug("Generating shasum for #{file}")
+      hashfunc = Digest::SHA1.new
+      File.open(file, "rb") do |io|
+        while (!io.eof)
+          hashfunc.update(io.readpartial(1024)) 
+        end
+      end
+      Metarepo::Log.debug("#{file} shasum #{hashfunc.hexdigest}")
+      hashfunc.hexdigest
+    end
+
+    def self.get_md5sum(file)
+      Metarepo::Log.debug("Generating shasum for #{file}")
+      hashfunc = Digest::MD5.new
+      File.open(file, "rb") do |io|
+        while (!io.eof)
+          hashfunc.update(io.readpartial(1024)) 
+        end
+      end
+      Metarepo::Log.debug("#{file} shasum #{hashfunc.hexdigest}")
+      hashfunc.hexdigest
+    end
+
     def validate
       super
       validates_unique :shasum

@@ -142,9 +142,31 @@ describe Metarepo::Repo do
     it "creates yum indexes for yum repositories" do
       @repo.sync_to_upstream(@upstream.name, @pool)
       @repo.update_index 
-      File.exists?(File.join(@repo.repo_dir, @repo.name, "repodata", "repomd.xml"))
+      File.exists?(File.join(@repo.repo_dir, @repo.name, "repodata", "repomd.xml")).should == true
+    end
+
+    it "creates apt repos for apt repositories" do
+      repo = Metarepo::Repo.new
+      repo.name = "all_that_remains"
+      repo.type = "apt"
+      repo.path = File.join(SPEC_SCRATCH, "repos", "all_that_remains")
+      repo.repo_dir = File.join(SPEC_SCRATCH, "repos")
+      repo.save
+      upstream = Metarepo::Upstream.create(:name => "debian", :type => "apt", :path => File.join(SPEC_DATA, "/upstream/debian/dists/stable/main/binary-amd64"))
+      upstream.sync_packages
+      pool_dir = File.join(SPEC_SCRATCH, "pool")
+      pool = Metarepo::Pool.new(pool_dir)
+      pool.update
+      repo.sync_to_upstream(upstream.name, pool)
+      repo.update_index 
+      File.exists?(File.join(repo.repo_dir, repo.name, "Release")).should == true
+      File.exists?(File.join(repo.repo_dir, repo.name, "dists", "main", "binary-amd64", "Release")).should == true
+      File.exists?(File.join(repo.repo_dir, repo.name, "dists", "main", "binary-i386", "Release")).should == true
+      File.exists?(File.join(repo.repo_dir, repo.name, "dists", "main", "binary-amd64", "Packages.gz")).should == true
+      File.exists?(File.join(repo.repo_dir, repo.name, "dists", "main", "binary-i386", "Packages.gz")).should == true
     end
   end
+
 end
 
 

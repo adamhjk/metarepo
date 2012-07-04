@@ -52,7 +52,13 @@ class Metarepo
     end
 
     def repo_file_for(package)
-      File.expand_path(File.join(repo_path, package.filename))
+      case type
+      when "apt"
+        Metarepo.create_directory(File.join(repo_path, "pool"))
+        File.expand_path(File.join(repo_path, "pool", package.filename))
+      else
+        File.expand_path(File.join(repo_path, package.filename))
+      end
     end
 
     def link_package(package, pool=nil)
@@ -99,11 +105,92 @@ class Metarepo
       Metarepo.command("createrepo #{repo_path}")
     end
 
+    def update_index_apt
+      archs = [ "amd64", "i386" ]
+      files_to_include_in_release = []
+      package_files = []
+      archs.each do |arch|
+        arch_dist_path = File.join(repo_path, "dists", "main", "binary-#{arch}")
+        Metarepo.create_directory(arch_dist_path)
+        files_to_include_in_release << File.join(arch_dist_path, "Release")
+        files_to_include_in_release << File.join(arch_dist_path, "Packages.gz")
+
+        File.open(File.join(arch_dist_path, "Release"), "w") do |file|
+          file.print <<-EOH
+Archive: #{name} 
+Component: main
+Origin: metarepo 
+Label: metarepo 
+Architecture: #{arch} 
+          EOH
+        end
+        package_files << File.open(File.join(arch_dist_path, "Packages"), "w")
+      end
+      Dir[File.join(repo_path, "pool", "*.deb")].each do |deb_file|
+        Dir.mktmpdir("debian") do |tmpdir|
+          Metarepo.command("dpkg-deb -e #{deb_file} #{tmpdir}")
+          package_data = ""
+          package_arch = nil
+          File.open(File.join(tmpdir, "control")) do |control|
+            control.each_line do |line|
+              case line
+              when /^(Essential|Filename|MD5Sum|SHA1|SHA256|Size)/
+                next
+              when /^Architecture: (.+)$/
+                package_arch = $1
+              end
+              package_data << line
+            end
+          end
+          package_data << "Filename: #{deb_file}\n"
+          package_data << "MD5Sum: #{Metarepo::Package.get_md5sum(deb_file)}\n"
+          package_data << "SHA1: #{Metarepo::Package.get_shasum1(deb_file)}\n"
+          package_data << "SHA256: #{Metarepo::Package.get_shasum(deb_file)}\n"
+          package_data << "Size: #{File.stat(deb_file).size}\n"
+          package_files.each do |pfile|
+            if pfile =~ /binary-#{package_arch}/ || package_arch == "all"
+              pfile.print package_data 
+            end
+          end
+        end
+      end
+      package_files.each do |pf|
+        pf.close
+        Metarepo.command("gzip #{pf.path}")
+      end
+      File.open(File.join(repo_path, "Release"), "w") do |release_file|
+        release_file.puts <<-EOH
+Origin: metarepo
+Label: metarepo 
+Codename: #{name} 
+Components: main
+Architectures: #{archs.join(" ")} 
+EOH
+        md5string = "MD5Sum:\n"
+        sha1string = "SHA1:\n"
+        sha256string = "SHA256:\n"
+        files_to_include_in_release.each do |file|
+          size = File.stat(file).size
+          md5sum = Metarepo::Package.get_md5sum(file)
+          sha1sum = Metarepo::Package.get_shasum1(file)
+          sha256sum = Metarepo::Package.get_shasum(file)
+          md5string << "  #{md5sum} #{size} #{file}\n"
+          sha1string << "  #{sha1sum} #{size} #{file}\n"
+          sha256string << "  #{sha256sum} #{size} #{file}\n"
+        end
+        release_file.puts md5string
+        release_file.puts sha1string
+        release_file.puts sha256string
+      end
+    end
+
     def update_index
       Metarepo::Log.info("Creating package index")
       case type
       when "yum"
         update_index_yum
+			when "apt"
+        update_index_apt
       end
     end
 

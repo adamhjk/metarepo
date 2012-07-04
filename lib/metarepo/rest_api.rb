@@ -42,6 +42,7 @@ class Metarepo
         "path" => p.path,
         "filename" => p.filename,
         "version" => p.version,
+				"iteration" => p.iteration,
         "arch" => p.arch,
         "maintainer" => p.maintainer,
         "description" => p.description,
