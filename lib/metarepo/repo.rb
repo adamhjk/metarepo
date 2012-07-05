@@ -113,6 +113,7 @@ class Metarepo
         arch_dist_path = File.join(repo_path, "dists", "main", "binary-#{arch}")
         Metarepo.create_directory(arch_dist_path)
         files_to_include_in_release << File.join(arch_dist_path, "Release")
+        files_to_include_in_release << File.join(arch_dist_path, "Packages")
         files_to_include_in_release << File.join(arch_dist_path, "Packages.gz")
 
         File.open(File.join(arch_dist_path, "Release"), "w") do |file|
@@ -142,27 +143,31 @@ Architecture: #{arch}
               package_data << line
             end
           end
-          package_data << "Filename: #{deb_file}\n"
+          deb_file =~ /\/(pool\/.+)$/
+          pool_filename = $1
+          package_data << "Filename: #{pool_filename}\n"
           package_data << "MD5Sum: #{Metarepo::Package.get_md5sum(deb_file)}\n"
           package_data << "SHA1: #{Metarepo::Package.get_shasum1(deb_file)}\n"
           package_data << "SHA256: #{Metarepo::Package.get_shasum(deb_file)}\n"
           package_data << "Size: #{File.stat(deb_file).size}\n"
           package_files.each do |pfile|
-            if pfile =~ /binary-#{package_arch}/ || package_arch == "all"
-              pfile.print package_data 
+            Metarepo::Log.info("Writing #{deb_file} to #{pfile.path}")
+            if pfile.path =~ /binary-#{package_arch}/ || package_arch == "all"
+              pfile.puts package_data 
+              pfile.print "\n"
             end
           end
         end
       end
       package_files.each do |pf|
         pf.close
-        Metarepo.command("gzip #{pf.path}")
+        Metarepo.command("bash -c 'cat #{pf.path} | gzip > #{pf.path}.gz'")
       end
-      File.open(File.join(repo_path, "Release"), "w") do |release_file|
+      File.open(File.join(repo_path, "dists", "main", "Release"), "w") do |release_file|
         release_file.puts <<-EOH
 Origin: metarepo
 Label: metarepo 
-Codename: #{name} 
+Codename: main 
 Components: main
 Architectures: #{archs.join(" ")} 
 EOH
@@ -170,17 +175,27 @@ EOH
         sha1string = "SHA1:\n"
         sha256string = "SHA256:\n"
         files_to_include_in_release.each do |file|
+          file =~ /(binary-.+)$/
+          filename = $1 
           size = File.stat(file).size
           md5sum = Metarepo::Package.get_md5sum(file)
           sha1sum = Metarepo::Package.get_shasum1(file)
           sha256sum = Metarepo::Package.get_shasum(file)
-          md5string << "  #{md5sum} #{size} #{file}\n"
-          sha1string << "  #{sha1sum} #{size} #{file}\n"
-          sha256string << "  #{sha256sum} #{size} #{file}\n"
+          md5string << "  #{md5sum} #{size} ./#{filename}\n"
+          sha1string << "  #{sha1sum} #{size} ./#{filename}\n"
+          sha256string << "  #{sha256sum} #{size} ./#{filename}\n"
         end
         release_file.puts md5string
         release_file.puts sha1string
         release_file.puts sha256string
+      end
+      File.unlink(File.join(repo_path, "dists", "main", "Release.gpg")) if File.exists?(File.join(repo_path, "dists", "main", "Release.gpg"))
+      Metarepo.command("gpg -abs --no-tty --use-agent -u'#{Metarepo::Config['gpg_key']}' -o'#{File.join(repo_path, "dists", "main", "Release.gpg")}' #{File.join(repo_path, "dists", "main", "Release")}")
+      Dir.mktmpdir("gpg") do |tmpdir|
+        Metarepo.command("chmod 0700 #{tmpdir}")
+        Metarepo.command("bash -c 'gpg -q --export -a \'#{Metarepo::Config['gpg_key']}\' > #{File.join(repo_path, "pubkey.gpg")}'")
+        Metarepo.command("bash -c 'cat #{File.join(repo_path, "pubkey.gpg")} | gpg -q --homedir #{tmpdir} --import'")
+        Metarepo.command("mv #{File.join(tmpdir, "pubring.gpg")} #{File.join(repo_path, "keyring.gpg")}")
       end
     end
 

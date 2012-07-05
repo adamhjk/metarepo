@@ -52,6 +52,9 @@ require 'resque/tasks'
 task "resque:setup" do
   $: << File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
   require 'metarepo'
+  if File.exists?("/etc/metarepo.rb")
+    Metarepo::Config.from_file("/etc/metarepo.rb")
+  end
   Metarepo::Log.level = :debug
   Metarepo.connect_db 
   require 'metarepo/job/repo_sync_packages'

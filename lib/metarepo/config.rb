@@ -27,6 +27,7 @@ class Metarepo
     repo_path '/var/opt/metarepo/repo'
     upstream_path '/var/opt/metarepo/upstream'
 		uri "http://localhost:6667"
+    gpg_key "metarepo@example.com"
 
   end
 end
