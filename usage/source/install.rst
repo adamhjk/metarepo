@@ -40,7 +40,7 @@ Start the Resque worker
 -----------------------
 
 .. code-block:: bash
-  
-  bundle exec rake resque:work
+ 
+  VVERBOSE=1 QUEUE=default bundle exec rake resque:work
 
 
