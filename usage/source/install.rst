@@ -27,7 +27,7 @@ Create the database
 
 .. code-block:: bash
 
-  bundle exec sequel -m ./migrations postgresql://localhost/metarepo
+  bundle exec sequel -m ./migrations postgres://localhost/metarepo
 
 Start the REST API
 ------------------
