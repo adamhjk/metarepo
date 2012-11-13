@@ -43,7 +43,7 @@ class Metarepo
       return p if !p.nil?
       p = Metarepo::Package.new
       p.shasum = shasum
-      p.type = "rpm"
+      p.package_type = "rpm"
       p.path = file
       p.filename = File.basename(file)
       Metarepo::Log.debug("Extracting package data from #{file}")
@@ -65,7 +65,7 @@ class Metarepo
       return p if !p.nil?
       p = Metarepo::Package.new
       p.shasum = shasum
-      p.type = "deb"
+      p.package_type = "deb"
       p.path = file
       p.filename = File.basename(file)
       Metarepo::Log.debug("Extracting package data from #{file}")
@@ -139,8 +139,8 @@ class Metarepo
     def validate
       super
       validates_unique :shasum
-      validates_presence [ :name, :version, :iteration, :arch, :maintainer, :url, :description, :path, :type, :filename ]
-      errors.add(:type, "must be deb or rpm") unless [ "deb", "rpm" ].include?(type)
+      validates_presence [ :name, :version, :iteration, :arch, :maintainer, :url, :description, :path, :package_type, :filename ]
+      errors.add(:package_type, "must be deb or rpm") unless [ "deb", "rpm" ].include?(package_type)
     end
 
   end

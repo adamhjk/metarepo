@@ -32,9 +32,9 @@ class Metarepo
       :description => "The repo name",
       :required => true
 
-      option :type,
-      :short => "-t TYPE",
-      :long => "--type TYPE",
+      option :repo_type,
+      :short => "-t REPO_TYPE",
+      :long => "--type REPO_TYPE",
       :description => "The type of thing to sync to (upstream or repo)",
       :required => true
 
@@ -46,7 +46,7 @@ class Metarepo
 
       def run
         response = @rest["/repo/#{config[:name]}/packages"].put(
-                                                                Yajl::Encoder.encode({ "sync" => { "type" => config[:type], "name" => config[:sync_to] }}),
+                                                                Yajl::Encoder.encode({ "sync" => { "repo_type" => config[:repo_type], "name" => config[:sync_to] }}),
                                                                 { :content_type => "application/json" }
                                                                 )
         data = Yajl::Parser.parse(response.body)

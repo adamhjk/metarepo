@@ -32,9 +32,9 @@ class Metarepo
       :description => "The upstream name",
       :required => true
 
-      option :type,
-      :short => "-t TYPE",
-      :long => "--type TYPE",
+      option :upstream_type,
+      :short => "-t UPSTREAM_TYPE",
+      :long => "--type UPSTREAM_TYPE",
       :description => "The upstream type (yum, apt, dir)",
       :required => true
 
@@ -47,7 +47,7 @@ class Metarepo
       # upstream create
       def run
         response = @rest["/upstream/#{config[:name]}"].put(
-                                                           Yajl::Encoder.encode({ "name" => config[:name], "type" => config[:type], "path" => config[:path] }),
+                                                           Yajl::Encoder.encode({ "name" => config[:name], "upstream_type" => config[:upstream_type], "path" => config[:path] }),
                                                            { :content_type => "application/json" }
                                                            )
         data = Yajl::Parser.parse(response.body)

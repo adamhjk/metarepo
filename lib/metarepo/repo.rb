@@ -28,12 +28,12 @@ class Metarepo
     def validate
       super
       validates_unique :name
-      validates_presence [ :type ]
-      errors.add(:type, "must be yum, apt or dir") unless [ "yum", "apt", "dir" ].include?(type)
+      validates_presence [ :repo_type ]
+      errors.add(:repo_type, "must be yum, apt or dir") unless [ "yum", "apt", "dir" ].include?(repo_type)
     end
 
     def list_packages
-      case type
+      case repo_type
       when "yum"
         Dir[File.join(path, "*.rpm")]
       when "apt"
@@ -52,7 +52,7 @@ class Metarepo
     end
 
     def repo_file_for(package)
-      case type
+      case repo_type
       when "apt"
         Metarepo.create_directory(File.join(repo_path, "pool"))
         File.expand_path(File.join(repo_path, "pool", package.filename))
@@ -201,7 +201,7 @@ EOH
 
     def update_index
       Metarepo::Log.info("Creating package index")
-      case type
+      case repo_type
       when "yum"
         update_index_yum
       when "apt"

@@ -37,7 +37,7 @@ class Metarepo
     def package_serialize(p)
       {
         "name" => p.name,
-        "type" => p.type,
+        "package_type" => p.package_type,
         "shasum" => p.shasum,
         "path" => p.path,
         "filename" => p.filename,
@@ -66,7 +66,7 @@ class Metarepo
       upstream = Metarepo::Upstream.new
       upstream.name = upstream_data["name"]
       upstream.path = upstream_data["path"]
-      upstream.type = upstream_data["type"]
+      upstream.upstream_type = upstream_data["upstream_type"]
       begin
         upstream.save
       rescue Sequel::ValidationFailed => e
@@ -89,7 +89,7 @@ class Metarepo
       serialize(
                 {
                   "name" => upstream[:name],
-                  "type" => upstream[:type],
+                  "upstream_type" => upstream[:upstream_type],
                   "path" => upstream[:path],
                   "created_at" => upstream[:created_at],
                   "updated_at" => upstream[:updated_at]
@@ -110,7 +110,7 @@ class Metarepo
       end
       upstream.name = upstream_data["name"]
       upstream.path = upstream_data["path"]
-      upstream.type = upstream_data["type"]
+      upstream.upstream_type = upstream_data["upstream_type"]
 
       begin
         upstream.save
@@ -164,7 +164,7 @@ class Metarepo
       repo_data = Yajl::Parser.parse(request.body.read)
       repo = Metarepo::Repo.new
       repo.name = repo_data["name"]
-      repo.type = repo_data["type"]
+      repo.repo_type = repo_data["repo_type"]
       begin
         repo.save
       rescue Sequel::ValidationFailed => e
@@ -186,7 +186,7 @@ class Metarepo
       repo = Metarepo::Repo[:name => params[:name]]
       serialize({
                   "name" => repo.name,
-                  "type" => repo.type,
+                  "repo_type" => repo.repo_type,
                   "created_at" => repo.created_at,
                   "updated_at" => repo.updated_at
                 })
@@ -204,7 +204,7 @@ class Metarepo
         repo = Metarepo::Repo.new
       end
       repo.name = repo_data["name"]
-      repo.type = repo_data["type"]
+      repo.repo_type = repo_data["repo_type"]
 
       begin
         repo.save
@@ -215,7 +215,7 @@ class Metarepo
       serialize(
                 {
                   "name" => repo[:name],
-                  "type" => repo[:type],
+                  "repo_type" => repo[:repo_type],
                   "created_at" => repo[:created_at],
                   "updated_at" => repo[:updated_at]
                 }

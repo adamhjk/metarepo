@@ -32,15 +32,15 @@ class Metarepo
       :description => "The repo name",
       :required => true
 
-      option :type,
-      :short => "-t TYPE",
-      :long => "--type TYPE",
+      option :repo_type,
+      :short => "-t REPO_TYPE",
+      :long => "--type REPO_TYPE",
       :description => "The repo type (yum, apt, dir)",
       :required => true
 
       def run
         @rest["/repo/#{config[:name]}"].put(
-                                            Yajl::Encoder.encode({ "name" => config[:name], "type" => config[:type] }),
+                                            Yajl::Encoder.encode({ "name" => config[:name], "repo_type" => config[:repo_type] }),
                                             { :content_type => "application/json" }
                                             )
         exit 0

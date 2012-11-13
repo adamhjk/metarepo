@@ -28,8 +28,8 @@ class Metarepo
     def validate
       super
       validates_unique :name
-      validates_presence [ :path, :type ]
-      errors.add(:type, "must be yum, apt or dir") unless [ "yum", "apt", "dir" ].include?(type)
+      validates_presence [ :path, :upstream_type ]
+      errors.add(:upstream_type, "must be yum, apt or dir") unless [ "yum", "apt", "dir" ].include?(upstream_type)
     end
 
     def list_packages
@@ -38,7 +38,7 @@ class Metarepo
       else
         real_path = File.join(Metarepo::Config.upstream_path, path)
       end
-      case type
+      case upstream_type
       when "yum"
         Dir[File.join(real_path, "*.rpm")]
       when "apt"
