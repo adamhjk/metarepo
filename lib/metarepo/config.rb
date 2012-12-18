@@ -22,11 +22,22 @@ class Metarepo
   class Config
     extend Mixlib::Config
 
+    def self.load
+      if File.exists?("/var/opt/metarepo/metarepo/etc/metarepo-service.rb")
+        Metarepo::Config.from_file("/var/opt/metarepo/metarepo/etc/metarepo-service.rb")
+      elsif File.exists?("/etc/metarepo/metarepo-service.rb")
+        Metarepo::Config.from_file("/etc/metarepo/metarepo-service.rb")
+      else
+        Metarepo::Log.warn("Cannot find a configuration file!")
+      end
+      true
+    end
+
     db_connect 'postgres://localhost/metarepo'
     pool_path '/var/opt/metarepo/pool'
     repo_path '/var/opt/metarepo/repo'
     upstream_path '/var/opt/metarepo/upstream'
-		uri "http://localhost:6667"
+    uri "http://localhost:6667"
     gpg_key "metarepo@example.com"
 
   end

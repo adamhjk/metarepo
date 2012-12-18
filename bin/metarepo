@@ -32,9 +32,7 @@ commands = {
 
 require 'pp'
 
-if File.exists?("/etc/metarepo.rb")
-  Metarepo::Config.from_file("/etc/metarepo.rb")
-end
+Metarepo::Config.load
 
 if commands.has_key?([ARGV[0], ARGV[1]])
 	cli = commands[[ARGV[0], ARGV[1]]].new
