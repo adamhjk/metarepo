@@ -3,7 +3,7 @@ source "http://rubygems.org"
 # Example:
 #   gem "activesupport", ">= 2.3.5"
 
-gem "unicorn"
+gem "thin"
 gem "sequel", ">= 3.33.0"
 gem "pg", ">= 0"
 gem "mixlib-config", ">= 0"
