@@ -12,27 +12,27 @@ Metarepo is a "meta-repository" management system. It:
 * Imports packages from the upstreams into a single managed "pool".
 * Allows you to create arbitrary numbers of "repos", which can then be used by regular downstream package management tools.
 
-.. graphviz:: 
+.. graphviz::
 
   digraph workflow {
     "N upstreams" -> "pool" -> "N repos";
   }
 
 .. warning::
-  
-  Metarepo is **alpha** software. It works, but it's got lots of rough edges. If you
-  aren't feeling like rolling up your sleeves and going code diving when things get
-  wierd, probably not quite ready for you yet. If you **are** ready to do that, and
+
+  Metarepo is **alpha** software. It works, but it has lots of rough edges. If you
+  aren't feeling like rolling up your sleeves and going code-diving when things get
+  weird, probably not quite ready for you yet. If you **are** ready to do that, and
   it sounds cool, now is a good time to dive in.
 
-* We track "upstreams"
-* Files appear in the upstrem
+*	We track "upstreams"
+* Files appear in the upstream
 * Get added to the pool
 * Repos get created from packages in the pool
+
   * Can be synced to an upstream
   * Can be synced to another repo
   * Can have a specific policy
-
 
 Contents:
 
