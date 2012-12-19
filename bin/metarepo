@@ -17,17 +17,17 @@ require 'metarepo/command/package_list'
 require 'metarepo/command/package_show'
 
 commands = {
-	[ "upstream", "list" ] => Metarepo::Command::UpstreamList,
-	[ "upstream", "create" ] => Metarepo::Command::UpstreamCreate,
-	[ "upstream", "show" ] => Metarepo::Command::UpstreamShow,
-	[ "upstream", "packages" ] => Metarepo::Command::UpstreamPackages,
-	[ "repo", "list" ] => Metarepo::Command::RepoList,
-	[ "repo", "create" ] => Metarepo::Command::RepoCreate,
-	[ "repo", "show" ] => Metarepo::Command::RepoShow,
-	[ "repo", "packages" ] => Metarepo::Command::RepoPackages,
-	[ "repo", "sync" ] => Metarepo::Command::RepoSync,
-	[ "package", "list" ] => Metarepo::Command::PackageList,
-	[ "package", "show" ] => Metarepo::Command::PackageShow,
+  [ "upstream", "list" ] => Metarepo::Command::UpstreamList,
+  [ "upstream", "create" ] => Metarepo::Command::UpstreamCreate,
+  [ "upstream", "show" ] => Metarepo::Command::UpstreamShow,
+  [ "upstream", "packages" ] => Metarepo::Command::UpstreamPackages,
+  [ "repo", "list" ] => Metarepo::Command::RepoList,
+  [ "repo", "create" ] => Metarepo::Command::RepoCreate,
+  [ "repo", "show" ] => Metarepo::Command::RepoShow,
+  [ "repo", "packages" ] => Metarepo::Command::RepoPackages,
+  [ "repo", "sync" ] => Metarepo::Command::RepoSync,
+  [ "package", "list" ] => Metarepo::Command::PackageList,
+  [ "package", "show" ] => Metarepo::Command::PackageShow,
 }
 
 require 'pp'
@@ -35,15 +35,15 @@ require 'pp'
 Metarepo::Config.load
 
 if commands.has_key?([ARGV[0], ARGV[1]])
-	cli = commands[[ARGV[0], ARGV[1]]].new
-	cli.options = cli.options.merge!(Metarepo::Command.options)
-	cli.setup
-	cli.run
+  cli = commands[[ARGV[0], ARGV[1]]].new
+  cli.options = cli.options.merge!(Metarepo::Command.options)
+  cli.setup
+  cli.run
 else
-	puts "#{$0} COMMAND [options]"
-	commands.each do |command, klass| 
-		puts "  #{File.basename($0)} #{command.join(' ')} [options]"
-	end
-	exit 1
+  puts "#{$0} COMMAND [options]"
+  commands.each do |command, klass| 
+    puts "  #{File.basename($0)} #{command.join(' ')} [options]"
+  end
+  exit 1
 end
 
