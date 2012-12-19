@@ -21,7 +21,7 @@ Sequel.migration do
       primary_key :id
       String :name, :unique => true 
       String :path
-      String :type
+      String :upstream_type
     end
   end
 

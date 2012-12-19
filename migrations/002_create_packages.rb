@@ -27,7 +27,7 @@ Sequel.migration do
       String :maintainer
       String :url
       String :description
-      String :type
+      String :package_type
       String :filename
       String :path
     end

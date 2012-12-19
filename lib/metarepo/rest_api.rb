@@ -2,13 +2,13 @@
 # Author: adam@opscode.com
 #
 # Copyright 2012, Opscode, Inc.
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,21 +28,21 @@ require 'metarepo/job/repo_packages'
 require 'resque'
 
 class Metarepo
-	class RestAPI < Sinatra::Base
+  class RestAPI < Sinatra::Base
 
-		def serialize(data)
-			Yajl::Encoder.encode(data)
-		end
+    def serialize(data)
+      Yajl::Encoder.encode(data)
+    end
 
     def package_serialize(p)
       {
         "name" => p.name,
-        "type" => p.type,
+        "package_type" => p.package_type,
         "shasum" => p.shasum,
         "path" => p.path,
         "filename" => p.filename,
         "version" => p.version,
-				"iteration" => p.iteration,
+        "iteration" => p.iteration,
         "arch" => p.arch,
         "maintainer" => p.maintainer,
         "description" => p.description,
@@ -50,57 +50,57 @@ class Metarepo
       }
     end
 
-		get "/upstream" do
-			content_type :json
-			response_data = {}
-			Metarepo::Upstream.each do |upstream|
-				response_data[upstream.name] = url("/upstream/#{upstream.name}")
-			end
-			serialize(response_data)
-		end
+    get "/upstream" do
+      content_type :json
+      response_data = {}
+      Metarepo::Upstream.each do |upstream|
+        response_data[upstream.name] = url("/upstream/#{upstream.name}")
+      end
+      serialize(response_data)
+    end
 
-		post "/upstream" do
-			content_type :json
-			request.body.rewind
-			upstream_data = Yajl::Parser.parse(request.body.read)
-			upstream = Metarepo::Upstream.new
-			upstream.name = upstream_data["name"]
-			upstream.path = upstream_data["path"]
-			upstream.type = upstream_data["type"]
-			begin
-				upstream.save
-			rescue Sequel::ValidationFailed => e
-				if e.message == "name is already taken"
-					status 409
-					return serialize({ "error" => e.message })
-				else
-					status 400
-					return serialize({ "error" => e.message })
-				end
-			end
+    post "/upstream" do
+      content_type :json
+      request.body.rewind
+      upstream_data = Yajl::Parser.parse(request.body.read)
+      upstream = Metarepo::Upstream.new
+      upstream.name = upstream_data["name"]
+      upstream.path = upstream_data["path"]
+      upstream.upstream_type = upstream_data["upstream_type"]
+      begin
+        upstream.save
+      rescue Sequel::ValidationFailed => e
+        if e.message == "name is already taken"
+          status 409
+          return serialize({ "error" => e.message })
+        else
+          status 400
+          return serialize({ "error" => e.message })
+        end
+      end
       status 201
       meta = Metarepo::Job::UpstreamSyncPackages.enqueue(upstream.id)
       serialize({ :enqueued_at => meta.enqueued_at, :job_id => meta.meta_id, :job_class => meta.job_class })
-		end
+    end
 
     get "/upstream/:name" do
       content_type :json
       upstream = Metarepo::Upstream[:name => params[:name]]
       serialize(
-        {
-          "name" => upstream[:name],
-          "type" => upstream[:type],
-          "path" => upstream[:path],
-          "created_at" => upstream[:created_at],
-          "updated_at" => upstream[:updated_at]
-        }
-      )
+                {
+                  "name" => upstream[:name],
+                  "upstream_type" => upstream[:upstream_type],
+                  "path" => upstream[:path],
+                  "created_at" => upstream[:created_at],
+                  "updated_at" => upstream[:updated_at]
+                }
+                )
     end
 
-		put "/upstream/:name" do
-			content_type :json
-			request.body.rewind
-			upstream_data = Yajl::Parser.parse(request.body.read)
+    put "/upstream/:name" do
+      content_type :json
+      request.body.rewind
+      upstream_data = Yajl::Parser.parse(request.body.read)
       upstream = Metarepo::Upstream[:name => upstream_data["name"]]
       if upstream
         status 202
@@ -110,31 +110,31 @@ class Metarepo
       end
       upstream.name = upstream_data["name"]
       upstream.path = upstream_data["path"]
-      upstream.type = upstream_data["type"]
+      upstream.upstream_type = upstream_data["upstream_type"]
 
       begin
         upstream.save
-			rescue Sequel::ValidationFailed => e
+      rescue Sequel::ValidationFailed => e
         status 400
         return serialize({ "error" => e.message })
-			end
+      end
 
       meta = Metarepo::Job::UpstreamSyncPackages.enqueue(upstream.id)
       serialize({ :enqueued_at => meta.enqueued_at, :job_id => meta.meta_id, :job_class => meta.job_class })
-		end
+    end
 
     get "/upstream/:name/packages" do
-			content_type :json
+      content_type :json
       upstream = Metarepo::Upstream[:name => params["name"]]
       response = {}
       upstream.packages_dataset.all do |p|
-        response[p.shasum] = package_serialize(p) 
+        response[p.shasum] = package_serialize(p)
       end
       serialize(response)
     end
 
     get "/package" do
-			content_type :json
+      content_type :json
       response = {}
       Metarepo::Package.dataset.select(:shasum).each do |package|
         response[package.shasum] = url("/package/#{package.shasum}")
@@ -143,14 +143,14 @@ class Metarepo
     end
 
     get "/package/:shasum" do
-			content_type :json
+      content_type :json
       response = {}
       package = Metarepo::Package[:shasum => params[:shasum]]
       serialize(package_serialize(package))
     end
 
     get "/repo" do
-			content_type :json
+      content_type :json
       response = {}
       Metarepo::Repo.dataset.select(:name).each do |repo|
         response[repo.name] = url("/repo/#{repo.name}")
@@ -158,44 +158,44 @@ class Metarepo
       serialize(response)
     end
 
-		post "/repo" do
-			content_type :json
-			request.body.rewind
-			repo_data = Yajl::Parser.parse(request.body.read)
-			repo = Metarepo::Repo.new
-			repo.name = repo_data["name"]
-			repo.type = repo_data["type"]
-			begin
-				repo.save
-			rescue Sequel::ValidationFailed => e
-				if e.message == "name is already taken"
-					status 409
-					return serialize({ "error" => e.message })
-				else
-					status 400
-					return serialize({ "error" => e.message })
-				end
-			end
+    post "/repo" do
+      content_type :json
+      request.body.rewind
+      repo_data = Yajl::Parser.parse(request.body.read)
+      repo = Metarepo::Repo.new
+      repo.name = repo_data["name"]
+      repo.repo_type = repo_data["repo_type"]
+      begin
+        repo.save
+      rescue Sequel::ValidationFailed => e
+        if e.message == "name is already taken"
+          status 409
+          return serialize({ "error" => e.message })
+        else
+          status 400
+          return serialize({ "error" => e.message })
+        end
+      end
       status 201
       serialize({ repo.name => url("/repo/#{repo.name}") })
-		end
+    end
 
     get "/repo/:name" do
-			content_type :json
+      content_type :json
       response = {}
       repo = Metarepo::Repo[:name => params[:name]]
       serialize({
-        "name" => repo.name,
-        "type" => repo.type,
-        "created_at" => repo.created_at,
-        "updated_at" => repo.updated_at
-      })
+                  "name" => repo.name,
+                  "repo_type" => repo.repo_type,
+                  "created_at" => repo.created_at,
+                  "updated_at" => repo.updated_at
+                })
     end
 
-		put "/repo/:name" do
-			content_type :json
-			request.body.rewind
-			repo_data = Yajl::Parser.parse(request.body.read)
+    put "/repo/:name" do
+      content_type :json
+      request.body.rewind
+      repo_data = Yajl::Parser.parse(request.body.read)
       repo = Metarepo::Repo[:name => repo_data["name"]]
       if repo
         status 202
@@ -203,29 +203,29 @@ class Metarepo
         status 201
         repo = Metarepo::Repo.new
       end
-			repo.name = repo_data["name"]
-			repo.type = repo_data["type"]
+      repo.name = repo_data["name"]
+      repo.repo_type = repo_data["repo_type"]
 
-			begin
-				repo.save
-			rescue Sequel::ValidationFailed => e
+      begin
+        repo.save
+      rescue Sequel::ValidationFailed => e
         status 400
         return serialize({ "error" => e.message })
-			end
+      end
       serialize(
-        {
-          "name" => repo[:name],
-          "type" => repo[:type],
-          "created_at" => repo[:created_at],
-          "updated_at" => repo[:updated_at]
-        }
-      )
-		end
+                {
+                  "name" => repo[:name],
+                  "repo_type" => repo[:repo_type],
+                  "created_at" => repo[:created_at],
+                  "updated_at" => repo[:updated_at]
+                }
+                )
+    end
 
     put "/repo/:name/packages" do
-			content_type :json
-			request.body.rewind
-			package_data = Yajl::Parser.parse(request.body.read)
+      content_type :json
+      request.body.rewind
+      package_data = Yajl::Parser.parse(request.body.read)
       repo = Metarepo::Repo[:name => params[:name]]
       if package_data.has_key?("sync")
         meta = Metarepo::Job::RepoSyncPackages.enqueue(repo.name, package_data["sync"]["type"], package_data["sync"]["name"])
@@ -237,18 +237,17 @@ class Metarepo
     end
 
     get "/job/:job_class/:job_id" do
-			content_type :json
+      content_type :json
       meta = Resque.constantize(params["job_class"]).get_meta(params["job_id"])
       serialize({
-        :job_id => meta.meta_id,
-        :job_class => meta.job_class,
-        :enqueued_at => meta.enqueued_at,
-        :started_at => meta.started_at,
-        :succeeded => meta.succeeded?,
-        :finished_at => meta.finished_at
-      })
+                  :job_id => meta.meta_id,
+                  :job_class => meta.job_class,
+                  :enqueued_at => meta.enqueued_at,
+                  :started_at => meta.started_at,
+                  :succeeded => meta.succeeded?,
+                  :finished_at => meta.finished_at
+                })
     end
 
-	end
+  end
 end
-

@@ -2,13 +2,13 @@
 # Author: adam@opscode.com
 #
 # Copyright 2012, Opscode, Inc.
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,31 +28,31 @@ class Metarepo
     def validate
       super
       validates_unique :name
-      validates_presence [ :type ]
-      errors.add(:type, "must be yum, apt or dir") unless [ "yum", "apt", "dir" ].include?(type)
+      validates_presence [ :repo_type ]
+      errors.add(:repo_type, "must be yum, apt or dir") unless [ "yum", "apt", "dir" ].include?(repo_type)
     end
 
     def list_packages
-      case type
+      case repo_type
       when "yum"
         Dir[File.join(path, "*.rpm")]
       when "apt"
         Dir[File.join(path, "*.deb")]
       when "dir"
         [
-          Dir[File.join(path, "*.rpm")],
-          Dir[File.join(path, "*.deb")]
+         Dir[File.join(path, "*.rpm")],
+         Dir[File.join(path, "*.deb")]
         ].flatten
       end
     end
-  
+
     def repo_path
       rpath = @repo_dir.nil? ? Metarepo::Config.repo_path : @repo_dir
       File.expand_path(File.join(rpath, name))
     end
 
     def repo_file_for(package)
-      case type
+      case repo_type
       when "apt"
         Metarepo.create_directory(File.join(repo_path, "pool"))
         File.expand_path(File.join(repo_path, "pool", package.filename))
@@ -69,13 +69,13 @@ class Metarepo
         Metarepo::Log.info("Building hard link for missing package #{package.name} in repo")
         File.link(pool.pool_file_for(package), repo_file_for(package))
       end
-      add_package(package) unless packages.detect { |o| o.shasum == package.shasum } 
+      add_package(package) unless packages.detect { |o| o.shasum == package.shasum }
     end
 
     def unlink_package(package, pool=nil)
       Metarepo::Log.info("Unlinking #{package.name} from repo #{name}")
       File.unlink(repo_file_for(package)) if File.exists?(repo_file_for(package))
-      remove_package(package) 
+      remove_package(package)
     end
 
     def sync_packages(upstream_packages, pool=nil)
@@ -118,11 +118,11 @@ class Metarepo
 
         File.open(File.join(arch_dist_path, "Release"), "w") do |file|
           file.print <<-EOH
-Archive: #{name} 
+Archive: #{name}
 Component: main
-Origin: metarepo 
-Label: metarepo 
-Architecture: #{arch} 
+Origin: metarepo
+Label: metarepo
+Architecture: #{arch}
           EOH
         end
         package_files << File.open(File.join(arch_dist_path, "Packages"), "w")
@@ -153,7 +153,7 @@ Architecture: #{arch}
           package_files.each do |pfile|
             Metarepo::Log.info("Writing #{deb_file} to #{pfile.path}")
             if pfile.path =~ /binary-#{package_arch}/ || package_arch == "all"
-              pfile.puts package_data 
+              pfile.puts package_data
               pfile.print "\n"
             end
           end
@@ -166,17 +166,17 @@ Architecture: #{arch}
       File.open(File.join(repo_path, "dists", "main", "Release"), "w") do |release_file|
         release_file.puts <<-EOH
 Origin: metarepo
-Label: metarepo 
-Codename: main 
+Label: metarepo
+Codename: main
 Components: main
-Architectures: #{archs.join(" ")} 
+Architectures: #{archs.join(" ")}
 EOH
         md5string = "MD5Sum:\n"
         sha1string = "SHA1:\n"
         sha256string = "SHA256:\n"
         files_to_include_in_release.each do |file|
           file =~ /(binary-.+)$/
-          filename = $1 
+          filename = $1
           size = File.stat(file).size
           md5sum = Metarepo::Package.get_md5sum(file)
           sha1sum = Metarepo::Package.get_shasum1(file)
@@ -201,14 +201,13 @@ EOH
 
     def update_index
       Metarepo::Log.info("Creating package index")
-      case type
+      case repo_type
       when "yum"
         update_index_yum
-			when "apt"
+      when "apt"
         update_index_apt
       end
     end
 
   end
 end
-
