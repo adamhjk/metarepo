@@ -32,7 +32,7 @@ commands = {
 
 require 'pp'
 
-Metarepo::Config.load
+Metarepo::Config.load(true) # we are a client!
 
 if commands.has_key?([ARGV[0], ARGV[1]])
   cli = commands[[ARGV[0], ARGV[1]]].new

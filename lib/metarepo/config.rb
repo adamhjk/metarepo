@@ -2,13 +2,13 @@
 # Author: adam@opscode.com
 #
 # Copyright 2012, Opscode, Inc.
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,8 +22,10 @@ class Metarepo
   class Config
     extend Mixlib::Config
 
-    def self.load
-      if File.exists?("/var/opt/metarepo/metarepo/etc/metarepo-service.rb")
+    def self.load(client=false)
+      if client && File.exists?("/etc/metarepo/metarepo-client.rb")
+        Metarepo::Config.from_file("/etc/metarepo/metarepo-client.rb")
+      elsif File.exists?("/var/opt/metarepo/metarepo/etc/metarepo-service.rb")
         Metarepo::Config.from_file("/var/opt/metarepo/metarepo/etc/metarepo-service.rb")
       elsif File.exists?("/etc/metarepo/metarepo-service.rb")
         Metarepo::Config.from_file("/etc/metarepo/metarepo-service.rb")
